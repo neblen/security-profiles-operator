@@ -91,6 +91,7 @@ func (p *podSeccompRecorder) Handle(
 
 	podChanged := false
 	pod := &corev1.Pod{}
+	p.log.Info(fmt.Sprintf("pod.Name:%s , pod.GenerateName:%s", pod.Name, pod.GenerateName))
 	if req.Operation != admissionv1.Delete {
 		pod, err = p.impl.DecodePod(req)
 		if err != nil {
@@ -100,10 +101,11 @@ func (p *podSeccompRecorder) Handle(
 	}
 
 	podName := req.Name
+	p.log.Info(fmt.Sprintf("req.Name:%s", req.Name))
 	if podName == "" {
 		podName = pod.GenerateName
+		p.log.Info(fmt.Sprintf("podName为空, 将pod.GenerateName赋给podName:%s", podName))
 	}
-
 	podLabels := labels.Set(pod.GetLabels())
 	items := profileRecordings.Items
 
@@ -161,6 +163,11 @@ func (p *podSeccompRecorder) Handle(
 	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
 }
 
+func rangeMap(key, value interface{}) bool {
+	fmt.Printf("key = %s, value = %s ", key, value)
+	return true
+}
+
 func (p *podSeccompRecorder) updatePod(
 	pod *corev1.Pod,
 	profileRecording *profilerecordingv1alpha1.ProfileRecording,
@@ -176,9 +183,11 @@ func (p *podSeccompRecorder) updatePod(
 
 	// Handle replicas by tracking them
 	replica := ""
-	p.log.Info(fmt.Sprintf("pod.Name:%s, pod.GenerateName:%s \n", pod.Name, pod.GenerateName))
+	p.log.Info(fmt.Sprintf("pod.Name:%s, pod.GenerateName:%s ", pod.Name, pod.GenerateName))
 	if pod.Name == "" && pod.GenerateName != "" {
-		p.log.Info(fmt.Sprintf("此时pod为空,generateName不为空\n"))
+		p.log.Info(fmt.Sprintf("此时pod为空,generateName不为空 "))
+		p.log.Info(fmt.Sprintf("遍历sync.Map "))
+		p.replicas.Range(rangeMap)
 		v, _ := p.replicas.LoadOrStore(pod.GenerateName, uint(0))
 		replica = fmt.Sprintf("-%d", v)
 		p.replicas.Store(pod.GenerateName, v.(uint)+1)
@@ -186,9 +195,9 @@ func (p *podSeccompRecorder) updatePod(
 
 	for i := range ctrs {
 		ctr := ctrs[i]
-		p.log.Info(fmt.Sprintf("replica: %s, ctr.Name:%s \n", replica, ctr.Name))
+		p.log.Info(fmt.Sprintf("replica: %s, ctr.Name:%s ", replica, ctr.Name))
 		key, value, err := profileRecording.CtrAnnotation(replica, ctr.Name)
-		p.log.Info(fmt.Sprintf("key:%s, value:%s \n", key, value))
+		p.log.Info(fmt.Sprintf("key:%s, value:%s ", key, value))
 		if err != nil {
 			return false, err
 		}
