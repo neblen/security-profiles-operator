@@ -176,7 +176,9 @@ func (p *podSeccompRecorder) updatePod(
 
 	// Handle replicas by tracking them
 	replica := ""
+	p.log.Info(fmt.Sprintf("pod.Name:%s, pod.GenerateName:%s \n", pod.Name, pod.GenerateName))
 	if pod.Name == "" && pod.GenerateName != "" {
+		p.log.Info(fmt.Sprintf("此时pod为空,generateName不为空\n"))
 		v, _ := p.replicas.LoadOrStore(pod.GenerateName, uint(0))
 		replica = fmt.Sprintf("-%d", v)
 		p.replicas.Store(pod.GenerateName, v.(uint)+1)
@@ -184,8 +186,9 @@ func (p *podSeccompRecorder) updatePod(
 
 	for i := range ctrs {
 		ctr := ctrs[i]
-
+		p.log.Info(fmt.Sprintf("replica: %s, ctr.Name:%s \n", replica, ctr.Name))
 		key, value, err := profileRecording.CtrAnnotation(replica, ctr.Name)
+		p.log.Info(fmt.Sprintf("key:%s, value:%s \n", key, value))
 		if err != nil {
 			return false, err
 		}
