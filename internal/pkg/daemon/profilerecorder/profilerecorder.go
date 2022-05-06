@@ -283,6 +283,7 @@ func (r *RecorderReconciler) Reconcile(_ context.Context, req reconcile.Request)
 	}
 
 	if pod.Status.Phase == corev1.PodSucceeded {
+		r.log.Info(fmt.Sprintf("pod状态为成功时,开始收集syscall, req.NamespacedName:%s", req.NamespacedName))
 		if err := r.collectProfile(ctx, req.NamespacedName); err != nil {
 			return reconcile.Result{}, errors.Wrap(err, "collect profile for succeeded pod")
 		}
