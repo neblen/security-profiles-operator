@@ -191,6 +191,8 @@ func (p *podSeccompRecorder) updatePod(
 		v, _ := p.replicas.LoadOrStore(pod.GenerateName, uint(0))
 		replica = fmt.Sprintf("-%d", v)
 		p.replicas.Store(pod.GenerateName, v.(uint)+1)
+		p.log.Info(fmt.Sprintf("再次遍历sync.Map "))
+		p.replicas.Range(rangeMap)
 	}
 
 	for i := range ctrs {
