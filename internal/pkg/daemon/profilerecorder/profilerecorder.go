@@ -19,6 +19,7 @@ package profilerecorder
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -204,7 +205,7 @@ func (r *RecorderReconciler) Reconcile(_ context.Context, req reconcile.Request)
 
 	ctx, cancel := context.WithTimeout(context.Background(), reconcileTimeout)
 	defer cancel()
-
+	r.log.Info(fmt.Sprintf("当前正在处理的pod:%s, req.NamespacedName:%s", req.Name, req.NamespacedName))
 	pod, err := r.GetPod(ctx, r.client, req.NamespacedName)
 	if err != nil {
 		if kerrors.IsNotFound(err) {

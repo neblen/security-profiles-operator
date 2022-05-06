@@ -91,9 +91,9 @@ func (p *podSeccompRecorder) Handle(
 
 	podChanged := false
 	pod := &corev1.Pod{}
-	p.log.Info(fmt.Sprintf("pod.Name:%s , pod.GenerateName:%s", pod.Name, pod.GenerateName))
 	if req.Operation != admissionv1.Delete {
 		pod, err = p.impl.DecodePod(req)
+		p.log.Info(fmt.Sprintf("将req解析成pod,获得pod实体 pod.Name:%s , pod.GenerateName:%s", pod.Name, pod.GenerateName))
 		if err != nil {
 			p.log.Error(err, "Failed to decode pod")
 			return admission.Errored(http.StatusBadRequest, err)
