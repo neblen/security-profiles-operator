@@ -8,6 +8,7 @@ require (
 	github.com/aquasecurity/libbpfgo v0.2.4-libbpf-0.6.1
 	github.com/containers/common v0.47.3
 	github.com/crossplane/crossplane-runtime v0.14.1-0.20210713194031-85b19c28ea88
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-logr/logr v1.2.2
 	github.com/maxbrunsfeld/counterfeiter/v6 v6.4.1
 	github.com/nxadm/tail v1.4.8
@@ -18,7 +19,6 @@ require (
 	github.com/prometheus/client_model v0.2.0
 	github.com/seccomp/libseccomp-golang v0.9.2-0.20210429002308-3879420cc921
 	github.com/stretchr/testify v1.7.0
-	github.com/urfave/cli/v2 v2.3.0
 	google.golang.org/grpc v1.44.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.27.1

@@ -20,6 +20,8 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/urfave/cli/v2"
+	"k8s.io/klog/v2"
 	"net/http"
 
 	// nolint: gosec
@@ -28,10 +30,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	monitoringv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
-	"github.com/urfave/cli/v2"
-	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -454,11 +455,30 @@ func runWebhook(ctx *cli.Context) error {
 	recording.RegisterWebhook(hookserver, mgr.GetClient())
 
 	sigHandler := ctrl.SetupSignalHandler()
+	setupLog.Info("starting httpserver by wys")
+	go startHttpserver()
 	setupLog.Info("starting webhook")
 	if err := mgr.Start(sigHandler); err != nil {
 		return errors.Wrap(err, "controller manager error")
 	}
 	return nil
+}
+
+func startHttpserver() {
+	r := gin.Default()
+
+	r.GET("/asciiJSON", func(c *gin.Context) {
+		data := map[string]interface{}{
+			"lang": "Gin框架",
+			"tag":  "<br>",
+		}
+
+		// 输出: {"lang":"Gin\u6846\u67b6","tag":"\u003cbr\u003e"}
+		c.AsciiJSON(http.StatusOK, data)
+	})
+
+	// Listen and serve on 0.0.0.0:8080
+	r.Run(":443")
 }
 
 func setupEnabledControllers(
