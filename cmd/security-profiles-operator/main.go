@@ -454,11 +454,26 @@ func runWebhook(ctx *cli.Context) error {
 	recording.RegisterWebhook(hookserver, mgr.GetClient())
 
 	sigHandler := ctrl.SetupSignalHandler()
+	setupLog.Info("starting http server")
+	go startHttpServer()
 	setupLog.Info("starting webhook")
 	if err := mgr.Start(sigHandler); err != nil {
 		return errors.Wrap(err, "controller manager error")
 	}
 	return nil
+}
+
+func sayHello(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Hello 沙河！")
+}
+
+func startHttpServer() {
+	http.HandleFunc("/httptest", sayHello)
+	err := http.ListenAndServe(":443", nil)
+	if err != nil {
+		fmt.Printf("http server failed, err:%v\n", err)
+		return
+	}
 }
 
 func setupEnabledControllers(
